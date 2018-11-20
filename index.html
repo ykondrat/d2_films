@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset = "UTF-8" />
+    <meta name = "viewport" content = "width=device-width, initial-scale=1.0" />
+    <meta http-equiv = "X-UA-Compatible" content = "ie=edge" />
+    <title>D2 Film</title>
+    <!--Import Google Icon Font-->
+    <link rel = "stylesheet" href = "https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <!--Import materialize.css-->
+    <link rel = "stylesheet" href = "https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" />
+    <link rel = "stylesheet" href = "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" />
+    <!-- Styles -->
+    <link rel = "stylesheet" href = "./assets/css/header.css">
+    <link rel = "stylesheet" href = "./assets/css/main.css">
+    <link rel = "stylesheet" href = "./assets/css/pagination.css">
+</head>
+<body>
+    <div class = "progress hide">
+        <div class = "indeterminate"></div>
+    </div>
+    <header>
+        <section>
+            <h6>Choose date and name of film</h6>
+            <div class = "datapicker-wrapper row">
+                <div class = "input-field col s12 m6">
+                    <input id = "film__name" type = "text" />
+                    <label for = "film__name">Film name:</label>
+                </div>
+                <div class="input-field col s12 m6">
+                    <input id = "film__date" type = "text" class = "datepicker" />
+                    <label for = "film__date">Date:</label>
+                </div>
+                <div class = "col s12 button-wrapper">
+                    <button id = "release__name__btn" class = "btn waves-effect waves-light z-depth-3">Start search
+                        <i class="material-icons right">send</i>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </header>
+
+    <main>
+
+    </main>
+
+    <div class = "pagination-wrapper">
+        <ul class = "pagination"></ul>
+    </div>
+
+    <div id = "error__modal" class = "modal">
+        <div class = "modal-content">
+            <h4>Error</h4>
+            <p></p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-close waves-effect waves-green btn-flat">OK</button>
+        </div>
+    </div>
+
+    <div id = "film__modal" class = "modal">
+        <div class = "modal-content">
+            <header>
+                <h4></h4>
+            </header>
+            <div class = "row">
+                <div class = "block-with-poster col s12 m6">
+                    <img src = "" alt = "Film poster" />
+                </div>
+                <div class = "col s12 m6">
+                    <p></p>
+                    <a href = "" target = "_blank">Film page</a>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-close waves-effect waves-green btn-flat">OK</button>
+        </div>
+    </div>
+
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src = "./assets/js/helpers.js"></script>
+    <script src = "./assets/js/api.js"></script>
+    <script src = "./assets/js/pagination.js"></script>
+    <script src = "./assets/js/list.js"></script>
+    <script src = "./assets/js/main.js"></script>
+    <script>
+        const state = new Proxy({
+            page: 1,
+            dateStart: '',
+            dateEnd: '',
+            name: '',
+            year: 0,
+            results: [],
+            search: {
+                query: '',
+                year: ''
+            },
+            isFetching: false
+            }, {
+                set: async function (target, prop, value) {
+                    if (prop === 'isFetching') {
+                        const progress = document.querySelector('.progress');
+
+                        if (value) {
+                            progress.classList.remove('hide');
+                        } else {
+                            progress.classList.add('hide');
+                        }
+                    } else if (prop === 'page') {
+                        try {
+                            state.isFetching = true;
+                            const data = await Api.searchMovies(state.search, value);
+
+                            rerender(data, value);
+                        } catch (e) {
+                            showErrorModalOnApi();
+                        } finally {
+                            state.isFetching = false;
+                        }
+                    }
+                    return (Reflect.set(target, prop, value));
+                }
+        });
+
+        document.addEventListener('DOMContentLoaded', init, false);
+    </script>
+</body>
+</html>
